@@ -1,0 +1,32 @@
+---
+- name: Deploy Docker Containers
+  hosts: all
+  become: true
+
+  vars:
+    github_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+
+  tasks:
+    - name: Docker login to GitHub Container Registry
+      command: >
+        docker login ghcr.io -u MaximeMRF -p {{ github_token }}
+      environment:
+        GITHUB_TOKEN: "{{ github_token }}"
+
+    - name: Docker Compose pull api
+      command: docker compose pull api
+      args:
+        chdir: /srv/backend
+
+    - name: Docker Compose up --no-deps -d api
+      command: docker compose up --no-deps -d api
+      args:
+        chdir: /srv/backend
+
+    - name: Docker Compose up -d
+      command: docker compose up -d
+      args:
+        chdir: /srv/backend
+
+    - name: Docker image prune -f
+      command: docker image prune -f
